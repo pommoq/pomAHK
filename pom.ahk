@@ -257,69 +257,106 @@ addTagCut("{","}")
 return 
 
 
+#IfWinActive, ahk_class Notepad
+^d:: ;notepad - text functions - copy line above (duplicate line above)
+WinGet, hWnd, ID, A
+ControlGet, vCurrentLineNum, CurrentLine,, Edit1, % "ahk_id " hWnd
+ControlGet, vText, Line, % vCurrentLineNum-1, Edit1, % "ahk_id " hWnd
+Control, EditPaste, % vText, Edit1, % "ahk_id " hWnd
+return
+#IfWinActive
 
+
+ChangeBrightness( ByRef brightness, timeout = 1 )
+{
+	if ( brightness > 0 && brightness < 100 )
+	{
+		For property in ComObjGet( "winmgmts:\\.\root\WMI" ).ExecQuery( "SELECT * FROM WmiMonitorBrightnessMethods" )
+			property.WmiSetBrightness( timeout, brightness )	
+	}
+ 	else if ( brightness >= 100 )
+ 	{
+ 		brightness := 100
+ 	}
+ 	else if ( brightness <= 0 )
+ 	{
+ 		brightness := 0
+ 	}
+}
+
+GetCurrentBrightNess()
+{
+	For property in ComObjGet( "winmgmts:\\.\root\WMI" ).ExecQuery( "SELECT * FROM WmiMonitorBrightness" )
+		currentBrightness := property.CurrentBrightness	
+
+	return currentBrightness
+}
+
+CapsLock & f1::
+; MsgBox, "b-"
+ChangeBrightness( CurrentBrightness -= Increments ) ; decrease brightness
+return
+CapsLock & f2::
+; MsgBox, "b+"
+ChangeBrightness( CurrentBrightness += Increments ) ; decrease brightness
+return 
+
+Pause::
+send, {enter}
+Return
+XButton1:: ;ปุ่ม mosue ใกล้ตัว (โคนนิ้วโป้ง)
+ While GetKeyState("XButton1","P"){
+  send, {Down}
+  sleep 80
+ }
+Return
+XButton2:: ;ปุ่ม mosue ไกลตัว (ปลายนิ้วโป้ง)
+ While GetKeyState("XButton2","P"){
+  send, {Up}
+  sleep 80
+ }
+return
 #IfWinNotActive ahk_group DisSwapLine
 
 
-~RControl::
-if (A_PriorHotkey != "~RControl" or A_TimeSincePriorHotkey > 400)
-{
-    ; Too much time between presses, so this isn't a double-press.
-    KeyWait, RControl
-    return
-}
-MsgBox You double-pressed the right control key.
+; ~LControl::
+; if (A_PriorHotkey != "~LControl" or A_TimeSincePriorHotkey > 400)
+; {
+;     ; Too much time between presses, so this isn't a double-press.
+;     KeyWait, LControl
+;     return
+; }
+;   Increments := 10 ; < lower for a more granular change, higher for larger jump in brightness 
+;   CurrentBrightness := GetCurrentBrightNess()
+;   ChangeBrightness( CurrentBrightness -= Increments ) ; decrease brightness
+;   MsgBox You double-pressed the right control key. %CurrentBrightness%
+;   ChangeBrightness( CurrentBrightness += Increments ) ; increase brightness
+;   MsgBox You double-pressed the right control key. %CurrentBrightness%
+
+; return
+
+~!PgDn::
+  BlockInput On
+    sendinput, {end}{home}{home}{ShiftDown}{end}{del}{ShiftUp}
+    ClipWait
+    if regexmatch(clipboard,"`a)(\r| )") {
+      sendinput, ^z
+      sendinput, {home}{home}{ShiftDown}{end}{left}{del}{ShiftUp}
+    }
+    sendinput,{del}{down}{enter}{up}{ShiftDown}{Insert}{ShiftUp}
+  BlockInput Off
 return
 
-~^+Down::
-; SetKeyDelay, 500
-; sendinput, {end}{ShiftDown}{up}{end}{del}{ShiftUp}{Down}{end}{ShiftDown}{Insert}{ShiftUp}
-; BlockInput On
-; Clipboard :=  ""
-; sendinput, {home}{ShiftDown}{end}{del}{ShiftUp}{del}{down}{enter}{up}{ShiftDown}{Insert}{CtrlDown}{ShiftDown}
-; sendinput, {home}{ShiftDown}{end}{del}{ShiftUp}{del}
-; Clipboard :=  "`n" . Clipboard
-; sendinput, {end}{ShiftDown}{Insert}
-; sendinput,{ShiftDown}{CtrlDown}
-tmp_clip := ClipboardAll ; preserve old clipboard 
-Clipboard := "" ; empty the clipboard so the ClipWait can check that the new content has landed 
-  sendinput, {home}{Shift Down}{end}{del}{Shift Up} ; CUT LINE
-  sendinput, {del}
-  Clipboard :=  "`n" . Clipboard
-ClipWait ; wait until clipboard contains data 
-sendinput, {end}{Shift Down}{Insert}{Shift Up}
-; sendinput, {ShiftDown}{Insert}{ShiftDown}{CtrlDown}
-PasteWait()
-Clipboard := tmp_clip ; restore the clipboard 
-ClipWait
-; BlockInput Off
-; KeyWait, Down
-return
-
-~^+Up::
-; BlockInput On
-; Clipboard :=  ""
-; sendinput, {home}{ShiftDown}{end}{del}{ShiftUp}{del}{up}{enter}{up}{ShiftDown}{Insert}{CtrlDown}{ShiftDown}
-; BlockInput Off
-; sendinput, {home}{ShiftDown}{end}{del}{ShiftUp}{del}
-; Clipboard :=  "`n" . Clipboard
-; sendinput, {up 2}{end}{ShiftDown}{Insert}
-; sendinput,{ShiftDown}{CtrlDown}
-tmp_clip := ClipboardAll ; preserve old clipboard 
-Clipboard := "" ; empty the clipboard so the ClipWait can check that the new content has landed 
-  sendinput, {home}{Shift Down}{end}{del}{Shift Up} ; CUT LINE
-  sendinput, {del}
-  ; Clipboard :=  "`n" . Clipboard
-  sendinput, {up}{enter}{up}
-ClipWait ; wait until clipboard contains data   
-sendinput, {Shift Down}{Insert}{Shift Up}
-PasteWait()
-Clipboard := tmp_clip ; restore the clipboard 
-ClipWait
-; OutputDebug, % A_KeyDelay
-; sendinput, {end}{enter}{ShiftDown}{up}{del}{Shiftup}{BackSpace}{home}{ShiftDown}{Insert}{Shiftup}{up}{End}
-; sendinput, {end}{enter}{ShiftDown}{up}{del}{ShiftUp}{BackSpace}{home}{ShiftDown}{Insert}{ShiftUp}{left}{End}
-; KeyWait, Up
+~!PgUp::
+  BlockInput On
+    sendinput, {end}{home}{home}{ShiftDown}{end}{del}{ShiftUp}
+    ClipWait
+    if regexmatch(clipboard,"`a)(\r| )") {
+      sendinput, ^z
+      sendinput, {home}{home}{ShiftDown}{end}{left}{del}{ShiftUp}  
+    }
+    sendinput, {del}{up}{enter}{up}{ShiftDown}{Insert}{ShiftUp}
+  BlockInput Off
 return
 
 ; ^+Down::SendInput {HOME 2}+{END}^x{Delete}{Down}^v{Enter}
