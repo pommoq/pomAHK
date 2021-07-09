@@ -316,6 +316,20 @@ XButton2:: ;ปุ่ม mosue ไกลตัว (ปลายนิ้วโ�
   sleep 80
  }
 return
+
+Volume_Down::
+BlockInput On
+  send, {Down}
+BlockInput Off
+return
+Volume_Up::
+BlockInput On
+  send, {Up}
+BlockInput Off
+return
+
+
+
 #IfWinNotActive ahk_group DisSwapLine
 
 
@@ -562,7 +576,11 @@ return
 #o::
 WinActivate, LINE
 if !WinExist("LINE") {
-  run , C:\Users\suppakorn\AppData\Local\LINE\bin\LineLauncher.exe
+  EnvGet, username, username 
+  msgbox % username
+  ; path := "C:\Users\" username "\AppData\Roaming\Code\User"
+  path := "C:\Users\" username "\AppData\Local\LINE\bin\LineLauncher.exe"
+  run , %path%
 }
 WinWait, ahk_exe Line.exe
 WinActivate, LINE
@@ -572,11 +590,12 @@ OutputDebug, %X% %Y%
 ; MouseMove, %X%, %Y%,5
 MouseClick,left, %X%, %Y%
 X:=X+300
+Y:=Y+150
 ; MouseMove, %X%, %Y%,5
 MouseClick,left, %X%, %Y%
 ; return
 Sleep, 500
-ImageSearch, FoundX, FoundY, 0, 0, A_ScreenWidth, A_ScreenHeight, *80 capture_line.bmp
+ImageSearch, FoundX, FoundY, X, Y, A_ScreenWidth, A_ScreenHeight, capture_line_V7.bmp
 OutputDebug, found= %FoundX%, %FoundY%
 FoundX := FoundX +0
 if (FoundX = null) {
@@ -595,15 +614,21 @@ SysGet, Mon1, Monitor, 1
 
 OutputDebug, area=  %Mon1Right%,%Mon1Bottom%
 Sleep, 500
-ImageSearch, FoundX, FoundY, 0, 0, A_ScreenWidth, A_ScreenHeight, *60 scantext_line.bmp
+ImageSearch, FoundX, FoundY, 0, 0, A_ScreenWidth, A_ScreenHeight, *60 scantext_line_V7.bmp
 OutputDebug, found= %FoundX%, %FoundY%
 FoundX += 10
 FoundY += 10
 MouseMove, %FoundX%, %FoundY% , 5
 MouseClick
 Sleep, 2500
-MouseMove, 722, 336 , 5
+
+ImageSearch, FoundX, FoundY, 0, 0, A_ScreenWidth, A_ScreenHeight, copytext_line_V7.bmp
+OutputDebug, found= %FoundX%, %FoundY%
+FoundX += 10
+FoundY += 10
+MouseMove, %FoundX%, %FoundY% , 5
 MouseClick
+
 return
 
 
