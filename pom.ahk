@@ -577,7 +577,7 @@ return
 WinActivate, LINE
 if !WinExist("LINE") {
   EnvGet, username, username 
-  msgbox % username
+  ; msgbox % username
   ; path := "C:\Users\" username "\AppData\Roaming\Code\User"
   path := "C:\Users\" username "\AppData\Local\LINE\bin\LineLauncher.exe"
   run , %path%
