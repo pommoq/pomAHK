@@ -595,6 +595,8 @@ Y:=Y+150
 MouseClick,left, %X%, %Y%
 ; return
 Sleep, 500
+
+; clike crop button
 ImageSearch, FoundX, FoundY, X, Y, A_ScreenWidth, A_ScreenHeight, capture_line_V7.bmp
 OutputDebug, found= %FoundX%, %FoundY%
 FoundX := FoundX +0
@@ -607,6 +609,13 @@ FoundY += 10
 
 MouseMove, %FoundX%, %FoundY% , 5
 MouseClick
+
+while !(GetKeyState("LButton", "P") or GetKeyState("ESC", "P")) 
+	sleep 50
+if (GetKeyState("ESC")) {
+  ; MsgBox, Cancle
+  return
+}
 
 KeyWait, LButton , D
 KeyWait, LButton
